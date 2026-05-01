@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EventType {
+  WORK
+  BREAK
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(MEMBER)
+  status        UserStatus @default(PENDING)
+  githubId      String?   @unique
+  
+  accounts      Account[]
+  sessions      Session[]
+  workSessions  WorkSession[]
+  accessRequests AccessRequest[] @relation("UserRequests")
+  reviewedRequests AccessRequest[] @relation("AdminReviews")
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model WorkSession {
+  id              String         @id @default(cuid())
+  userId          String
+  projectName     String         @default("Gresca")
+  startedAt       DateTime       @default(now())
+  endedAt         DateTime?
+  totalWorkedTime Int?           // In seconds
+  
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events          SessionEvent[]
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model SessionEvent {
+  id            String      @id @default(cuid())
+  workSessionId String
+  type          EventType
+  startedAt     DateTime    @default(now())
+  endedAt       DateTime?
+  
+  workSession   WorkSession @relation(fields: [workSessionId], references: [id], onDelete: Cascade)
+}
+
+model AccessRequest {
+  id          String     @id @default(cuid())
+  userId      String
+  requestedAt DateTime   @default(now())
+  reviewedBy  String?
+  status      UserStatus @default(PENDING)
+  
+  user        User       @relation("UserRequests", fields: [userId], references: [id], onDelete: Cascade)
+  admin       User?      @relation("AdminReviews", fields: [reviewedBy], references: [id])
+}
