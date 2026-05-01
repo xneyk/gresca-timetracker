@@ -19,8 +19,8 @@ Aquesta eina permetrà als membres de l’equip:
 
 * Iniciar sessió amb el seu compte de GitHub
 * Començar una sessió de treball amb un sol clic
-* Pausar la sessió quan facin un descans
-* Reprendre la sessió quan tornin
+* Pausar la sessió quan facin un descans (doncs el timer mostrara el temps que portes actualment en descans).
+* Reprendre la sessió quan tornin (el timer mostrara doncs el temps que portes desde que has représ la sessió).
 * Finalitzar la sessió i obtenir un resum detallat del temps invertit
 * Consultar les sessions pròpies i les de la resta de membres de l’equip
 
