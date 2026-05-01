@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from './ui/button'
-import { Play, Pause, Square } from 'lucide-react'
+import { Coffee, Rocket, FlagTriangleRight } from 'lucide-react'
 import { startSession, pauseSession, resumeSession, finishSession } from '@/lib/actions/sessions'
-import { EventType } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 
 interface TimeTrackerProps {
@@ -14,14 +13,22 @@ interface TimeTrackerProps {
 export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
   const router = useRouter()
   const [session, setSession] = useState(initialSession)
-  const [elapsed, setElapsed] = useState(initialSession?.currentElapsed || 0)
+  
+  const calculateCurrentElapsed = (sessionObj: any) => {
+    if (!sessionObj || !sessionObj.lastEventStart) return 0
+    const start = new Date(sessionObj.lastEventStart).getTime()
+    const now = new Date().getTime()
+    return Math.max(0, Math.floor((now - start) / 1000))
+  }
+
+  const [elapsed, setElapsed] = useState(calculateCurrentElapsed(initialSession))
   const [isPending, setIsPending] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (initialSession) {
       setSession(initialSession)
-      setElapsed(initialSession.currentElapsed || 0)
+      setElapsed(calculateCurrentElapsed(initialSession))
     } else {
       setSession(null)
       setElapsed(0)
@@ -30,10 +37,8 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
 
   useEffect(() => {
     const isActive = session && !session.endedAt
-    const isWorking = isActive && !session.isPaused
 
-    if (isWorking) {
-      // Clear any existing timer to avoid duplicates
+    if (isActive) {
       if (timerRef.current) clearInterval(timerRef.current)
       
       timerRef.current = setInterval(() => {
@@ -62,9 +67,7 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
     setIsPending(true)
     try {
       const newSession = await startSession()
-      // The session from startSession doesn't have currentElapsed/isPaused calculated
-      // but we know it's a fresh start.
-      setSession({ ...newSession, currentElapsed: 0, isPaused: false })
+      setSession({ ...newSession, lastEventStart: new Date(), isPaused: false })
       setElapsed(0)
     } catch (error) {
       console.error(error)
@@ -77,7 +80,8 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
     setIsPending(true)
     try {
       await pauseSession(session.id)
-      setSession({ ...session, isPaused: true })
+      setSession({ ...session, isPaused: true, lastEventStart: new Date() })
+      setElapsed(0)
     } catch (error) {
       console.error(error)
     } finally {
@@ -89,7 +93,8 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
     setIsPending(true)
     try {
       await resumeSession(session.id)
-      setSession({ ...session, isPaused: false })
+      setSession({ ...session, isPaused: false, lastEventStart: new Date() })
+      setElapsed(0)
     } catch (error) {
       console.error(error)
     } finally {
@@ -115,36 +120,36 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
   return (
     <div className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-xl border border-slate-100 transition-all">
       <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">
-        {isActive ? (isWorking ? '🔥 Session in progress' : '☕ Taking a break') : '✨ Ready for a new session?'}
+        {isActive ? (isWorking ? '🚀 Currently working' : '☕ Taking a break') : '✨ Start new session'}
       </h2>
       
-      <div className={`text-7xl font-mono font-black mb-10 tracking-tighter transition-colors ${
-        isWorking ? 'text-blue-600' : 'text-slate-300'
+      <div className={`text-7xl font-medium mb-10 tracking-tighter transition-colors ${
+        isWorking ? 'text-blue-600' : (isActive ? 'text-amber-500' : 'text-slate-300')
       }`}>
         {formatTime(elapsed)}
       </div>
 
-      <div className="flex gap-4 w-full max-w-sm">
+      <div className="flex flex-col gap-4 w-full">
         {!isActive ? (
-          <Button size="lg" onClick={handleStart} disabled={isPending} className="flex-1 h-16 text-lg font-black gap-3 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200">
-            <Play className="w-6 h-6 fill-current" />
+          <Button size="lg" onClick={handleStart} disabled={isPending} className="w-full h-16 text-lg font-black gap-3 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200">
+            <Rocket className="w-6 h-6 fill-current" />
             START WORK
           </Button>
         ) : (
           <>
             {isWorking ? (
-              <Button size="lg" variant="secondary" onClick={handlePause} disabled={isPending} className="flex-1 h-16 text-lg font-black gap-3 bg-slate-100 hover:bg-slate-200 text-slate-700">
-                <Pause className="w-6 h-6 fill-current" />
-                PAUSE
+              <Button size="lg" variant="secondary" onClick={handlePause} disabled={isPending} className="w-full h-16 text-lg font-black gap-3 bg-slate-100 hover:bg-slate-200 text-slate-700">
+                <Coffee className="w-6 h-6" />
+                TAKE A BREAK
               </Button>
             ) : (
-              <Button size="lg" onClick={handleResume} disabled={isPending} className="flex-1 h-16 text-lg font-black gap-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200">
-                <Play className="w-6 h-6 fill-current" />
-                RESUME
+              <Button size="lg" onClick={handleResume} disabled={isPending} className="w-full h-16 text-lg font-black gap-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200">
+                <Rocket className="w-6 h-6 fill-current" />
+                RESUME WORK
               </Button>
             )}
-            <Button size="lg" variant="danger" onClick={handleFinish} disabled={isPending} className="flex-1 h-16 text-lg font-black gap-3 bg-red-50 hover:bg-red-100 text-red-600 border-2 border-red-100">
-              <Square className="w-6 h-6 fill-current" />
+            <Button size="lg" variant="danger" onClick={handleFinish} disabled={isPending} className="w-full h-16 text-lg font-black gap-3 bg-red-50 hover:bg-red-100 text-red-600 border-2 border-red-100">
+              <FlagTriangleRight className="w-6 h-6 fill-current" />
               FINISH
             </Button>
           </>

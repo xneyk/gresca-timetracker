@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { LayoutDashboard, History, Settings, Users, Trophy, Activity, Clock, CalendarDays } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
+import { UserAccount } from '@/components/user-account'
 
 export default async function TeamDashboardPage({ 
   searchParams 
@@ -37,7 +38,7 @@ export default async function TeamDashboardPage({
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <h1 className="text-xl font-bold text-slate-900">Gresca Track</h1>
+            <h1 className="text-xl font-bold text-slate-900">Gresca TimeTracker</h1>
             <nav className="hidden md:flex items-center gap-6">
               <Link href="/dashboard" className="text-sm font-medium text-slate-500 hover:text-slate-900 flex items-center gap-2">
                 <LayoutDashboard className="w-4 h-4" />
@@ -60,7 +61,7 @@ export default async function TeamDashboardPage({
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <img src={session.user.image || ''} alt="" className="w-8 h-8 rounded-full border border-slate-200" />
+            <UserAccount user={session.user} />
           </div>
         </div>
       </header>
@@ -105,7 +106,7 @@ export default async function TeamDashboardPage({
                   <img src={member.image || ''} alt="" className="w-14 h-14 rounded-full border-2 border-slate-100 shadow-sm group-hover:scale-105 transition-transform" />
                   <div>
                     <Link href={`/team/${member.id}`}>
-                      <h3 className="text-lg font-black text-slate-900 hover:text-blue-600 transition-colors cursor-pointer">{member.name}</h3>
+                      <h3 className="font-bold text-slate-900 hover:text-blue-600 transition-colors cursor-pointer">{member.name}</h3>
                     </Link>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase">

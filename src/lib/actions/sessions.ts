@@ -185,10 +185,13 @@ export async function getActiveSession() {
       return acc + Math.floor((end.getTime() - event.startedAt.getTime()) / 1000)
     }, 0)
 
+  const lastEvent = activeSession.events[0]
+  const lastEventStart = lastEvent.startedAt
+
   return {
     ...activeSession,
-    currentElapsed: totalWorkedSeconds,
-    isPaused: activeSession.events[0].type === EventType.BREAK && !activeSession.events[0].endedAt
+    lastEventStart,
+    isPaused: lastEvent.type === EventType.BREAK && !lastEvent.endedAt
   }
 }
 
