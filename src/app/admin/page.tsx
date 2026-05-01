@@ -1,5 +1,6 @@
 import { getAccessRequests, getAllUsers } from '@/lib/actions/admin'
 import { UserManagement } from '@/components/user-management'
+import { RoleSelector } from '@/components/role-selector'
 import { LayoutDashboard, History, Settings, Users, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { getServerSession } from 'next-auth'
@@ -94,7 +95,15 @@ export default async function AdminPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                        {user.role}
+                        {user.id === session.user.id ? (
+                          <span className="font-medium text-slate-900">{user.role}</span>
+                        ) : (
+                          <RoleSelector 
+                            userId={user.id} 
+                            initialRole={user.role} 
+                            currentUserRole={session.user.role as UserRole} 
+                          />
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                         {new Date(user.createdAt).toLocaleDateString()}

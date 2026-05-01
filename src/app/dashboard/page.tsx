@@ -1,9 +1,9 @@
-import { getActiveSession } from '@/lib/actions/sessions'
+import { getActiveSession, getTodayStats } from '@/lib/actions/sessions'
 import { TimeTracker } from '@/components/time-tracker'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { LogOut, LayoutDashboard, History, Settings } from 'lucide-react'
+import { LogOut, LayoutDashboard, History, Settings, Users } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function DashboardPage() {
@@ -11,6 +11,13 @@ export default async function DashboardPage() {
   if (!session) redirect('/api/auth/signin')
 
   const activeSession = await getActiveSession()
+  const todayStats = await getTodayStats()
+
+  const formatDuration = (seconds: number) => {
+    const h = Math.floor(seconds / 3600)
+    const m = Math.floor((seconds % 3600) / 60)
+    return `${h}h ${m}m`
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -22,6 +29,10 @@ export default async function DashboardPage() {
               <Link href="/dashboard" className="text-sm font-medium text-slate-900 flex items-center gap-2">
                 <LayoutDashboard className="w-4 h-4" />
                 Dashboard
+              </Link>
+              <Link href="/team" className="text-sm font-medium text-slate-500 hover:text-slate-900 flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Team
               </Link>
               <Link href="/history" className="text-sm font-medium text-slate-500 hover:text-slate-900 flex items-center gap-2">
                 <History className="w-4 h-4" />
@@ -59,11 +70,11 @@ export default async function DashboardPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-1">
                   <span className="text-slate-600">Total Worked</span>
-                  <span className="font-bold text-slate-900">0h 0m</span>
+                  <span className="font-bold text-slate-900">{formatDuration(todayStats.totalWorkedTime)}</span>
                 </div>
                 <div className="flex justify-between items-center py-1">
                   <span className="text-slate-600">Sessions</span>
-                  <span className="font-bold text-slate-900">0</span>
+                  <span className="font-bold text-slate-900">{todayStats.sessionCount}</span>
                 </div>
               </div>
             </div>

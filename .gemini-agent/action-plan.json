@@ -194,12 +194,12 @@
             {
                "id": "6.1",
                "title": "Construir resum final de sessió",
-               "progress": "to-be-done"
+               "progress": "done"
             },
             {
                "id": "6.2",
                "title": "Construir timeline d’events",
-               "progress": "to-be-done"
+               "progress": "done"
             }
          ]
       },
@@ -210,22 +210,22 @@
             {
                "id": "7.1",
                "title": "Crear dashboard general d’equip",
-               "progress": "to-be-done"
+               "progress": "done"
             },
             {
                "id": "7.2",
                "title": "Crear dashboard individual per membre",
-               "progress": "to-be-done"
+               "progress": "done"
             },
             {
                "id": "7.3",
                "title": "Implementar filtres (dia/setmana/mes)",
-               "progress": "to-be-done"
+               "progress": "done"
             },
             {
                "id": "7.4",
                "title": "Visualitzar activitat recent",
-               "progress": "to-be-done"
+               "progress": "done"
             }
          ]
       },
@@ -236,17 +236,17 @@
             {
                "id": "8.1",
                "title": "Crear llista de requests pendents",
-               "progress": "in-progress"
+               "progress": "done"
             },
             {
                "id": "8.2",
                "title": "Implementar approve/reject",
-               "progress": "in-progress"
+               "progress": "done"
             },
             {
                "id": "8.3",
                "title": "Gestió de membres i permisos",
-               "progress": "in-progress"
+               "progress": "done"
             }
          ]
       },
@@ -257,12 +257,12 @@
             {
                "id": "9.1",
                "title": "Implementar historial personal",
-               "progress": "to-be-done"
+               "progress": "done"
             },
             {
                "id": "9.2",
                "title": "Implementar historial global d’equip",
-               "progress": "to-be-done"
+               "progress": "done"
             }
          ]
       },
@@ -273,7 +273,7 @@
             {
                "id": "10.1",
                "title": "Unit tests per càlcul de temps",
-               "progress": "to-be-done"
+               "progress": "done"
             },
             {
                "id": "10.2",
@@ -288,7 +288,7 @@
             {
                "id": "10.4",
                "title": "Validació d’edge cases",
-               "progress": "to-be-done"
+               "progress": "done"
             }
          ]
       },

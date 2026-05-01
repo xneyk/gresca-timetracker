@@ -1,50 +1,53 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from './ui/button'
-import { Play, Pause, Square, SkipForward } from 'lucide-react'
+import { Play, Pause, Square } from 'lucide-react'
 import { startSession, pauseSession, resumeSession, finishSession } from '@/lib/actions/sessions'
 import { EventType } from '@prisma/client'
+import { useRouter } from 'next/navigation'
 
 interface TimeTrackerProps {
-  initialSession: any // Type this properly later
+  initialSession: any 
 }
 
 export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
+  const router = useRouter()
   const [session, setSession] = useState(initialSession)
-  const [elapsed, setElapsed] = useState(0)
+  const [elapsed, setElapsed] = useState(initialSession?.currentElapsed || 0)
   const [isPending, setIsPending] = useState(false)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    setSession(initialSession)
+    if (initialSession) {
+      setSession(initialSession)
+      setElapsed(initialSession.currentElapsed || 0)
+    } else {
+      setSession(null)
+      setElapsed(0)
+    }
   }, [initialSession])
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    const isActive = session && !session.endedAt
+    const isWorking = isActive && !session.isPaused
 
-    if (session && !session.endedAt) {
-      const lastEvent = session.events[0]
+    if (isWorking) {
+      // Clear any existing timer to avoid duplicates
+      if (timerRef.current) clearInterval(timerRef.current)
       
-      if (lastEvent.type === EventType.WORK && !lastEvent.endedAt) {
-        // Calculate initial elapsed from events
-        // This is a bit complex for a client-side only timer, 
-        // usually we'd want to calculate it more accurately
-        interval = setInterval(() => {
-          setElapsed((prev) => prev + 1)
-        }, 1000)
+      timerRef.current = setInterval(() => {
+        setElapsed((prev) => prev + 1)
+      }, 1000)
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
       }
     }
 
-    return () => clearInterval(interval)
-  }, [session])
-
-  // Reset elapsed when session changes or on mount
-  useEffect(() => {
-    if (session && !session.endedAt) {
-      // Calculate total worked time so far
-      // For now, let's just use a simple approach
-    } else {
-      setElapsed(0)
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [session])
 
@@ -59,7 +62,10 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
     setIsPending(true)
     try {
       const newSession = await startSession()
-      setSession(newSession)
+      // The session from startSession doesn't have currentElapsed/isPaused calculated
+      // but we know it's a fresh start.
+      setSession({ ...newSession, currentElapsed: 0, isPaused: false })
+      setElapsed(0)
     } catch (error) {
       console.error(error)
     } finally {
@@ -71,8 +77,7 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
     setIsPending(true)
     try {
       await pauseSession(session.id)
-      // Re-fetch or update state locally
-      // For simplicity, let's assume we re-fetch via server actions revalidation
+      setSession({ ...session, isPaused: true })
     } catch (error) {
       console.error(error)
     } finally {
@@ -84,6 +89,7 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
     setIsPending(true)
     try {
       await resumeSession(session.id)
+      setSession({ ...session, isPaused: false })
     } catch (error) {
       console.error(error)
     } finally {
@@ -94,9 +100,8 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
   const handleFinish = async () => {
     setIsPending(true)
     try {
-      await finishSession(session.id)
-      setSession(null)
-      setElapsed(0)
+      const finishedSession = await finishSession(session.id)
+      router.push(`/sessions/${finishedSession.id}/summary`)
     } catch (error) {
       console.error(error)
     } finally {
@@ -105,40 +110,42 @@ export const TimeTracker = ({ initialSession }: TimeTrackerProps) => {
   }
 
   const isActive = session && !session.endedAt
-  const isWorking = isActive && session?.events?.[0]?.type === EventType.WORK
+  const isWorking = isActive && !session.isPaused
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm border border-slate-200">
-      <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">
-        {isActive ? (isWorking ? 'Working on Gresca' : 'Taking a break') : 'Ready to work?'}
+    <div className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-xl border border-slate-100 transition-all">
+      <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">
+        {isActive ? (isWorking ? '🔥 Session in progress' : '☕ Taking a break') : '✨ Ready for a new session?'}
       </h2>
       
-      <div className="text-6xl font-mono font-bold text-slate-900 mb-8">
+      <div className={`text-7xl font-mono font-black mb-10 tracking-tighter transition-colors ${
+        isWorking ? 'text-blue-600' : 'text-slate-300'
+      }`}>
         {formatTime(elapsed)}
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 w-full max-w-sm">
         {!isActive ? (
-          <Button size="lg" onClick={handleStart} disabled={isPending} className="gap-2">
-            <Play className="w-5 h-5 fill-current" />
-            Start Session
+          <Button size="lg" onClick={handleStart} disabled={isPending} className="flex-1 h-16 text-lg font-black gap-3 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200">
+            <Play className="w-6 h-6 fill-current" />
+            START WORK
           </Button>
         ) : (
           <>
             {isWorking ? (
-              <Button size="lg" variant="secondary" onClick={handlePause} disabled={isPending} className="gap-2">
-                <Pause className="w-5 h-5 fill-current" />
-                Take a Break
+              <Button size="lg" variant="secondary" onClick={handlePause} disabled={isPending} className="flex-1 h-16 text-lg font-black gap-3 bg-slate-100 hover:bg-slate-200 text-slate-700">
+                <Pause className="w-6 h-6 fill-current" />
+                PAUSE
               </Button>
             ) : (
-              <Button size="lg" onClick={handleResume} disabled={isPending} className="gap-2">
-                <Play className="w-5 h-5 fill-current" />
-                Resume Work
+              <Button size="lg" onClick={handleResume} disabled={isPending} className="flex-1 h-16 text-lg font-black gap-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200">
+                <Play className="w-6 h-6 fill-current" />
+                RESUME
               </Button>
             )}
-            <Button size="lg" variant="danger" onClick={handleFinish} disabled={isPending} className="gap-2">
-              <Square className="w-5 h-5 fill-current" />
-              Finish Session
+            <Button size="lg" variant="danger" onClick={handleFinish} disabled={isPending} className="flex-1 h-16 text-lg font-black gap-3 bg-red-50 hover:bg-red-100 text-red-600 border-2 border-red-100">
+              <Square className="w-6 h-6 fill-current" />
+              FINISH
             </Button>
           </>
         )}
