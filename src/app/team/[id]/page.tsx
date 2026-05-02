@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import prisma from '@/lib/prisma'
 
+import { BackButton } from '@/components/ui/back-button'
+
 interface UserProfilePageProps {
   params: Promise<{
     id: string
@@ -67,13 +69,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       </header>
 
       <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Link 
-          href="/team" 
-          className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-8 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Team
-        </Link>
+        <BackButton />
 
         <div className="bg-white border border-slate-200 rounded-3xl p-8 mb-12 shadow-sm flex flex-col md:flex-row items-center gap-8">
           <img src={user.image || ''} alt="" className="w-32 h-32 rounded-full border-4 border-slate-50 shadow-lg" />

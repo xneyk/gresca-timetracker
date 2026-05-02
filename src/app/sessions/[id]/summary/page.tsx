@@ -1,10 +1,11 @@
 import { getSessionById } from '@/lib/actions/sessions'
 import { notFound, redirect } from 'next/navigation'
-import { CheckCircle2, Clock, Calendar, ArrowLeft, PlayCircle, PauseCircle } from 'lucide-react'
+import { CheckCircle2, Clock, Calendar, PlayCircle, PauseCircle } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { BackButton } from '@/components/ui/back-button'
 
 interface SummaryPageProps {
   params: Promise<{
@@ -50,13 +51,7 @@ export default async function SessionSummaryPage({ params }: SummaryPageProps) {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <Link 
-          href={isOwner ? "/history" : `/team/${session.userId}`}
-          className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-8 transition-colors font-medium"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to {isOwner ? 'History' : `${session.user.name}'s Profile`}
-        </Link>
+        <BackButton />
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="bg-green-600 px-8 py-10 text-white text-center">
