@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gresca TimeTracker
 
-## Getting Started
+**Gresca TimeTracker** és una aplicació web moderna per al seguiment de temps de treball en equip, optimitzada per a projectes col·laboratius on la transparència i la precisió són clau.
 
-First, run the development server:
+## 🚀 Funcionalitats Clau
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Persistent & Real-time**: El comptador no s'atura ni es perd en tancar la sessió o refrescar la pàgina.
+- **Treball vs. Descans**: Registre detallat de segments de treball i pauses per a mètriques reals.
+- **Dashboard d'Equip**: Leaderboard dinàmic, activitat recent visual i estadístiques globals.
+- **Control d'Accés**: Integració amb GitHub OAuth i sistema d'aprovació d'usuaris per part d'administradors.
+- **Admin Panel**: Gestió total d'usuaris, rols i sol·licituds d'accés.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Stack Tecnològic
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend**: Next.js 15 (App Router), Tailwind CSS 4.
+- **Backend**: Next.js Server Actions & API Routes.
+- **Base de Dades**: PostgreSQL amb Prisma ORM.
+- **Autenticació**: NextAuth.js.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📖 Documentació Detallada
 
-## Learn More
+Per a més informació, consulteu els fitxers a la carpeta `.gemini-agent/`:
 
-To learn more about Next.js, take a look at the following resources:
+- [Especificacions i Requisits](.gemini-agent/app-requirements.md)
+- [Guia de Configuració i Desplegament](.gemini-agent/setup-guide.md)
+- [Estat del Projecte i Roadmap](.gemini-agent/project-status.md)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Configuració Ràpida
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Instal·la dependències: `npm install`
+2. Configura el fitxer `.env` (mira la [guia de configuració](.gemini-agent/setup-guide.md)).
+3. Executa migracions: `npx prisma migrate dev`
+4. Inicia en mode desenvolupament: `npm run dev`
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+Desenvolupat per a equips que valoren el seu temps.
