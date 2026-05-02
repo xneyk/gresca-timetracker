@@ -191,25 +191,46 @@ export async function getActiveSession() {
   return {
     ...activeSession,
     lastEventStart,
+    totalWorkedSeconds,
     isPaused: lastEvent.type === EventType.BREAK && !lastEvent.endedAt
   }
 }
 
 export async function getSessionById(sessionId: string) {
-  const user = await getAuthenticatedUser()
+  await getAuthenticatedUser()
 
   return prisma.workSession.findUnique({
     where: { 
-      id: sessionId,
-      userId: user.id 
+      id: sessionId
     },
     include: {
+      user: true,
       events: {
         orderBy: { startedAt: 'asc' },
       },
     },
   })
 }
+
+// Funció auxiliar per obtenir la mitjanit en la zona horària de Madrid com a objecte Date UTC
+const getMadridMidnightUTC = (date: Date) => {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Madrid',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  const madridDateStr = formatter.format(date); // YYYY-MM-DD
+  
+  // Creem un objecte que representi la mitjanit local a Madrid
+  const madridMidnightLocal = new Date(`${madridDateStr}T00:00:00`);
+  
+  // Calculem la diferència per obtenir el timestamp UTC real
+  const localInMadrid = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
+  const offset = localInMadrid.getTime() - date.getTime();
+  
+  return new Date(madridMidnightLocal.getTime() - offset);
+};
 
 export async function getTeamStats(period: 'today' | 'week' | 'month' | 'all' = 'all') {
   await getAuthenticatedUser()
@@ -218,15 +239,23 @@ export async function getTeamStats(period: 'today' | 'week' | 'month' | 'all' = 
   let startDate: Date | undefined
 
   if (period === 'today') {
-    startDate = new Date(now)
-    startDate.setHours(0, 0, 0, 0)
+    startDate = getMadridMidnightUTC(now);
   } else if (period === 'week') {
-    startDate = new Date(now)
-    const day = startDate.getDay() || 7 // Adjust for Sunday (0 -> 7)
-    startDate.setDate(startDate.getDate() - day + 1) // Start of Monday
-    startDate.setHours(0, 0, 0, 0)
+    const dayStart = getMadridMidnightUTC(now);
+    const day = dayStart.getDay() || 7 // Dilluns = 1, Diumenge = 7
+    startDate = new Date(dayStart)
+    startDate.setDate(startDate.getDate() - day + 1)
   } else if (period === 'month') {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Madrid',
+      year: 'numeric',
+      month: '2-digit'
+    });
+    const madridMonthStr = formatter.format(now); // YYYY-MM
+    const madridMonthLocal = new Date(`${madridMonthStr}-01T00:00:00`);
+    const localInMadrid = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
+    const offset = localInMadrid.getTime() - now.getTime();
+    startDate = new Date(madridMonthLocal.getTime() - offset);
   }
 
   const users = await prisma.user.findMany({
@@ -259,12 +288,36 @@ export async function getTeamStats(period: 'today' | 'week' | 'month' | 'all' = 
   }).sort((a, b) => b.totalWorkedTime - a.totalWorkedTime)
 }
 
-export async function getRecentActivity(limit: number = 10) {
+export async function getRecentActivity(period: 'today' | 'week' | 'month' | 'all' = 'all', limit: number = 10) {
   await getAuthenticatedUser()
+
+  const now = new Date()
+  let startDate: Date | undefined
+
+  if (period === 'today') {
+    startDate = getMadridMidnightUTC(now);
+  } else if (period === 'week') {
+    const dayStart = getMadridMidnightUTC(now);
+    const day = dayStart.getDay() || 7
+    startDate = new Date(dayStart)
+    startDate.setDate(startDate.getDate() - day + 1)
+  } else if (period === 'month') {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Madrid',
+      year: 'numeric',
+      month: '2-digit'
+    });
+    const madridMonthStr = formatter.format(now);
+    const madridMonthLocal = new Date(`${madridMonthStr}-01T00:00:00`);
+    const localInMadrid = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
+    const offset = localInMadrid.getTime() - now.getTime();
+    startDate = new Date(madridMonthLocal.getTime() - offset);
+  }
 
   return prisma.workSession.findMany({
     where: {
       endedAt: { not: null },
+      ...(startDate ? { startedAt: { gte: startDate } } : {}),
     },
     include: {
       user: true,
@@ -278,8 +331,8 @@ export async function getRecentActivity(limit: number = 10) {
 
 export async function getTodayStats() {
   const user = await getAuthenticatedUser()
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const now = new Date()
+  const today = getMadridMidnightUTC(now);
 
   const sessions = await prisma.workSession.findMany({
     where: {

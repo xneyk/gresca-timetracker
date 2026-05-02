@@ -1,16 +1,16 @@
-import { getUserSessions, getTeamStats } from '@/lib/actions/sessions'
+import { getUserSessions } from '@/lib/actions/sessions'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
-import { LayoutDashboard, History, Settings, Users, Calendar, Clock, ArrowLeft } from 'lucide-react'
+import { LayoutDashboard, History, Settings, Users, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import prisma from '@/lib/prisma'
 
 interface UserProfilePageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {

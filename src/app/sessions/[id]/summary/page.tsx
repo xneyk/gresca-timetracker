@@ -3,14 +3,19 @@ import { notFound, redirect } from 'next/navigation'
 import { CheckCircle2, Clock, Calendar, ArrowLeft, PlayCircle, PauseCircle } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 interface SummaryPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function SessionSummaryPage({ params }: SummaryPageProps) {
+  const currentUserSession = await getServerSession(authOptions)
+  if (!currentUserSession) redirect('/api/auth/signin')
+
   const { id } = await params
   const session = await getSessionById(id)
 
@@ -21,6 +26,8 @@ export default async function SessionSummaryPage({ params }: SummaryPageProps) {
   if (!session.endedAt) {
     redirect('/dashboard')
   }
+
+  const isOwner = currentUserSession.user.id === session.userId
 
   const formatDuration = (seconds: number) => {
     const h = Math.floor(seconds / 3600)
@@ -44,11 +51,11 @@ export default async function SessionSummaryPage({ params }: SummaryPageProps) {
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <Link 
-          href="/dashboard" 
-          className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-8 transition-colors"
+          href={isOwner ? "/history" : `/team/${session.userId}`}
+          className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-8 transition-colors font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Dashboard
+          Back to {isOwner ? 'History' : `${session.user.name}'s Profile`}
         </Link>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -57,24 +64,28 @@ export default async function SessionSummaryPage({ params }: SummaryPageProps) {
               <CheckCircle2 className="w-10 h-10" />
             </div>
             <h1 className="text-3xl font-bold mb-2">Session Summary</h1>
-            <p className="text-green-100 opacity-90">Great job! You&apos;ve completed your work session.</p>
+            <p className="text-green-100 opacity-90">
+              {isOwner 
+                ? "Great job! You've completed your work session." 
+                : `Session completed by ${session.user.name}`}
+            </p>
           </div>
 
           <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              <div className="flex flex-col items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="flex flex-col items-center p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
                 <Clock className="w-6 h-6 text-blue-600 mb-2" />
                 <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Worked</span>
                 <span className="text-xl font-bold text-slate-900">{formatDuration(session.totalWorkedTime || 0)}</span>
               </div>
               
-              <div className="flex flex-col items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="flex flex-col items-center p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
                 <Calendar className="w-6 h-6 text-blue-600 mb-2" />
                 <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Date</span>
                 <span className="text-xl font-bold text-slate-900">{format(session.startedAt, 'MMM do, yyyy')}</span>
               </div>
 
-              <div className="flex flex-col items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="flex flex-col items-center p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
                 <div className="flex gap-1 mb-2">
                   <span className="text-xs font-bold text-slate-400">{format(session.startedAt, 'HH:mm')}</span>
                   <span className="text-xs text-slate-300">-</span>
@@ -123,9 +134,9 @@ export default async function SessionSummaryPage({ params }: SummaryPageProps) {
             </div>
 
             <div className="mt-12 pt-8 border-t border-slate-100 flex justify-center">
-              <Link href="/dashboard">
+              <Link href={isOwner ? "/dashboard" : "/team"}>
                 <button className="px-8 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200">
-                  Return to Dashboard
+                  {isOwner ? "Return to Dashboard" : "Return to Team Dashboard"}
                 </button>
               </Link>
             </div>

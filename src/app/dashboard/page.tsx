@@ -4,7 +4,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { 
-  LogOut, 
   LayoutDashboard as DashboardIcon, 
   History as HistoryIcon, 
   Settings as SettingsIcon, 

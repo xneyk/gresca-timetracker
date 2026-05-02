@@ -18,7 +18,7 @@ export default async function TeamDashboardPage({
   const { period: periodParam } = await searchParams
   const period = (periodParam as 'today' | 'week' | 'month' | 'all') || 'all'
   const teamStats = await getTeamStats(period)
-  const recentActivity = await getRecentActivity(10)
+  const recentActivity = await getRecentActivity(period, 10)
 
   const formatDuration = (seconds: number) => {
     const h = Math.floor(seconds / 3600)
@@ -145,9 +145,16 @@ export default async function TeamDashboardPage({
 
             <div className="space-y-6">
               {recentActivity.map((session) => (
-                <div key={session.id} className="relative pl-8 before:absolute before:left-[11px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-100 last:before:hidden">
-                  <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-white border-2 border-blue-500 flex items-center justify-center z-10">
-                    <Clock className="w-3 h-3 text-blue-500" />
+                <div key={session.id} className="relative pl-10 before:absolute before:left-[19px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-100 last:before:hidden">
+                  <div className="absolute left-0 top-0 z-10">
+                    <img 
+                      src={session.user.image || ''} 
+                      alt="" 
+                      className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
+                    />
+                    <div className="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-white border-2 border-blue-500 flex items-center justify-center z-10">
+                      <Clock className="w-2.5 h-2.5 text-blue-500" />
+                    </div>
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-hover hover:border-blue-200">
                     <p className="text-sm text-slate-600 mb-2">
