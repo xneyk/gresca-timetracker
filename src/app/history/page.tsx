@@ -6,6 +6,7 @@ import { LayoutDashboard, History, Settings, Users, Calendar, Clock, ArrowRight 
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { UserAccount } from '@/components/user-account'
+import { DeleteSessionButton } from '@/components/delete-session-button'
 
 export default async function HistoryPage({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
   const session = await getServerSession(authOptions)
@@ -123,13 +124,18 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <Link 
-                      href={`/sessions/${s.id}/summary`}
-                      className="inline-flex items-center gap-1 text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors"
-                    >
-                      Details
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      {(s.userId === session.user.id || session.user.role === 'ADMIN') && (
+                        <DeleteSessionButton sessionId={s.id} />
+                      )}
+                      <Link 
+                        href={`/sessions/${s.id}/summary`}
+                        className="inline-flex items-center gap-1 text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors"
+                      >
+                        Details
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

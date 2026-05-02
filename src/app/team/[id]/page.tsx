@@ -2,10 +2,11 @@ import { getUserSessions } from '@/lib/actions/sessions'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
-import { LayoutDashboard, History, Settings, Users, ArrowLeft } from 'lucide-react'
+import { LayoutDashboard, History, Settings, Users } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import prisma from '@/lib/prisma'
+import { DeleteSessionButton } from '@/components/delete-session-button'
 
 import { BackButton } from '@/components/ui/back-button'
 
@@ -113,9 +114,14 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     {formatDuration(s.totalWorkedTime || 0)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <Link href={`/sessions/${s.id}/summary`} className="text-slate-400 hover:text-blue-600 font-bold text-sm">
-                      Details
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      {(user.id === session.user.id || session.user.role === 'ADMIN') && (
+                        <DeleteSessionButton sessionId={s.id} />
+                      )}
+                      <Link href={`/sessions/${s.id}/summary`} className="text-slate-400 hover:text-blue-600 font-bold text-sm">
+                        Details
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

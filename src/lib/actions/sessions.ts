@@ -388,3 +388,27 @@ export async function getAllSessions() {
     },
   })
 }
+
+export async function deleteSession(sessionId: string) {
+  const user = await getAuthenticatedUser()
+
+  const workSession = await prisma.workSession.findUnique({
+    where: { id: sessionId },
+  })
+
+  if (!workSession) throw new Error('Session not found')
+
+  // Only the owner or an admin can delete the session
+  if (workSession.userId !== user.id && user.role !== 'ADMIN') {
+    throw new Error('Not authorized to delete this session')
+  }
+
+  await prisma.workSession.delete({
+    where: { id: sessionId },
+  })
+
+  revalidatePath('/history')
+  revalidatePath('/dashboard')
+  revalidatePath('/team')
+  revalidatePath(`/team/${workSession.userId}`)
+}

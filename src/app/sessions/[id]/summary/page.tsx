@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { BackButton } from '@/components/ui/back-button'
+import { DeleteSessionButton } from '@/components/delete-session-button'
 
 interface SummaryPageProps {
   params: Promise<{
@@ -128,12 +129,23 @@ export default async function SessionSummaryPage({ params }: SummaryPageProps) {
               ))}
             </div>
 
-            <div className="mt-12 pt-8 border-t border-slate-100 flex justify-center">
+            <div className="mt-12 pt-8 border-t border-slate-100 flex flex-col items-center gap-6">
               <Link href={isOwner ? "/dashboard" : "/team"}>
                 <button className="px-8 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200">
                   {isOwner ? "Return to Dashboard" : "Return to Team Dashboard"}
                 </button>
               </Link>
+
+              {(isOwner || currentUserSession.user.role === 'ADMIN') && (
+                <div className="pt-6 border-t border-slate-100 w-full flex flex-col items-center">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Danger Zone</p>
+                  <DeleteSessionButton 
+                    sessionId={session.id} 
+                    variant="button" 
+                    redirectAfter={isOwner ? "/history" : `/team/${session.userId}`}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

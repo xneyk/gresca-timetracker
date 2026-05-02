@@ -17,6 +17,7 @@
 *   **Estats**:
     *   **Work (🚀 START WORK / RESUME WORK)**: Registra el temps de treball.
     *   **Break (☕ TAKE A BREAK)**: Atura el temps de treball i registra el temps de descans.
+*   **Eliminació de Sessions**: Els usuaris poden eliminar les seves pròpies sessions i els administradors poden eliminar qualsevol sessió, amb diàleg de confirmació per seguretat.
 *   **Resum de Sessió**: Timeline detallat en finalitzar, mostrant tots els intervals de treball i descans.
 
 ### 3. Dashboards i Visualització
