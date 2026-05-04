@@ -12,14 +12,20 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Pas CLAU per a Prisma 7: Passar una URL fictícia durant el build perquè npx prisma generate no falli
-ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
+# Argument de construcció per a Prisma (estàndard professional)
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
+# Generar el client de Prisma
 RUN npx prisma generate
 
+# Configuració per a servidors amb poca RAM (2GB)
 ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_OPTIONS="--max-old-space-size=1536"
+# Limitem Node a 1GB per deixar espai al sistema i evitar el SIGKILL
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 
-RUN npm run build
+# Build sense Turbopack (més lent però consumeix molta menys RAM)
+RUN npx next build --no-turbo
 
 FROM base AS runner
 WORKDIR /app
