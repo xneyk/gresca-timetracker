@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: gresca-app
+    container_name: gresca-timetracker
     restart: always
     ports:
       - "80:3000"

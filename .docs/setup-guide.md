@@ -17,7 +17,7 @@ Edita el fitxer `.env` amb les teves credencials de GitHub OAuth i genera un `NE
 ### 3. Aixecar el projecte
 ```bash
 docker compose up -d
-docker exec gresca-app npx prisma migrate dev
+docker exec gresca-timetracker npx prisma migrate deploy
 ```
 L'aplicació estarà disponible a `http://localhost:3000`.
 
