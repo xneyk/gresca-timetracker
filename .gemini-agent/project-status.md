@@ -45,7 +45,7 @@
 ## Estat de les Fases (Action Plan)
 *   **Fases 0 a 9**: 100% Completades.
 *   **Fase 10 (Testing)**: Lògica de càlcul i edge cases validats.
-*   **Fase 11 (Deploy)**: Pendent.
+*   **Fase 11 (Deploy & CD)**: Configurat amb GitHub Actions i DigitalOcean App Platform. Prêt per al primer desplegament.
 
 ## Detalls de Disseny
 *   **Layout**: Compacte (`max-w-2xl`) per al dashboard per millorar la llegibilitat.

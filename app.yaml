@@ -1,0 +1,37 @@
+name: gresca-timetracker
+region: fra
+services:
+- name: gresca-app
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 3000
+  build_command: npx prisma generate && npm run build
+  run_command: npx prisma migrate deploy && npm start
+  source_dir: /
+  github:
+    branch: master
+    deploy_on_push: true
+    repo: <el-teu-usuari>/gresca-timetracker
+  envs:
+  - key: DATABASE_URL
+    scope: RUN_AND_BUILD_TIME
+    value: ${db.DATABASE_URL}
+  - key: NEXTAUTH_URL
+    scope: RUN_TIME
+    value: https://gresca-timetracker-xxxx.ondigitalocean.app
+  - key: NEXTAUTH_SECRET
+    scope: RUN_TIME
+    type: SECRET
+  - key: GITHUB_ID
+    scope: RUN_TIME
+    type: SECRET
+  - key: GITHUB_SECRET
+    scope: RUN_TIME
+    type: SECRET
+
+databases:
+- engine: PG
+  name: db
+  num_nodes: 1
+  size_slug: db-s-dev-database
+  version: "15"

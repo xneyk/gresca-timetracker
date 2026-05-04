@@ -71,6 +71,28 @@ Necessitareu una base de dades PostgreSQL accessible des d'internet (Vercel Post
 
 ---
 
+## Continuous Deployment (GitHub Actions + DigitalOcean)
+
+Aquest projecte està preparat per a Continuous Deployment (CD). Cada vegada que es fa un `push` a la branca `master`, s'executa automàticament el pipeline.
+
+### 1. Preparació a DigitalOcean
+1. Crea una nova **App** a DigitalOcean App Platform.
+2. Connecta el teu compte de GitHub i selecciona el repositori `gresca-timetracker`.
+3. L'aplicació detectarà el fitxer `app.yaml` de l'arrel per configurar els serveis i la base de dades.
+
+### 2. Secrets de GitHub
+Afegeix els següents secrets al teu repositori de GitHub (`Settings > Secrets and variables > Actions`):
+- `DIGITALOCEAN_ACCESS_TOKEN`: El teu Personal Access Token de DigitalOcean.
+- `DO_APP_ID`: L'ID de l'App creada a DigitalOcean (opcional si uses el CD natiu de DO).
+
+### 3. Workflow d'Actions
+El fitxer `.github/workflows/deploy.yml` s'encarrega de:
+1. Instal·lar dependències i generar el client de Prisma.
+2. Executar el linter per assegurar la qualitat del codi.
+3. Notificar o disparar el desplegament a DigitalOcean.
+
+---
+
 ## Manteniment
 
 ### Actualitzar l'Schema de la Base de Dades
