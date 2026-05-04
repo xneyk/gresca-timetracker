@@ -12,19 +12,15 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Argument de construcció per a Prisma (estàndard professional)
+# Argument de construcció per a Prisma
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
-# Generar el client de Prisma
 RUN npx prisma generate
 
-# Configuració per a servidors amb poca RAM (2GB)
 ENV NEXT_TELEMETRY_DISABLED 1
-# Limitem Node a 1GB per deixar espai al sistema i evitar el SIGKILL
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 
-# Build estàndard (consumeix menys RAM que Turbopack)
 RUN npx next build
 
 FROM base AS runner
@@ -36,11 +32,15 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+# Copiar el fitxer standalone i els assets
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
+
+# Instal·lar Prisma a la imatge final per poder fer migracions fàcilment
+RUN npm install -g prisma
 
 USER nextjs
 EXPOSE 3000
