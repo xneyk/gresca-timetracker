@@ -12,10 +12,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Argument de construcció per a Prisma
-ARG DATABASE_URL
-ENV DATABASE_URL=$DATABASE_URL
-
+# Pas obligatori per a que la generació no falli (URL fictícia només pel build)
+ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -32,15 +30,10 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copiar el fitxer standalone i els assets
+COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
-
-# Instal·lar Prisma a la imatge final per poder fer migracions fàcilment
-RUN npm install -g prisma
 
 USER nextjs
 EXPOSE 3000
