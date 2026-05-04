@@ -24,8 +24,8 @@ ENV NEXT_TELEMETRY_DISABLED 1
 # Limitem Node a 1GB per deixar espai al sistema i evitar el SIGKILL
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 
-# Build sense Turbopack (més lent però consumeix molta menys RAM)
-RUN npx next build --no-turbo
+# Build estàndard (consumeix menys RAM que Turbopack)
+RUN npx next build
 
 FROM base AS runner
 WORKDIR /app
