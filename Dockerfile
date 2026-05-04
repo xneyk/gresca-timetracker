@@ -12,7 +12,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Pas obligatori per a que la generació no falli (URL fictícia només pel build)
+# Pas obligatori per a Prisma 7: URL present durant el build
 ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 RUN npx prisma generate
 
@@ -34,6 +34,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+# Copiem el nou fitxer de configuració JS
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.js ./prisma.config.js
 
 USER nextjs
 EXPOSE 3000
