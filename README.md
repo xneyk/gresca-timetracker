@@ -19,18 +19,18 @@
 
 ## 📖 Documentació Detallada
 
-Per a més informació, consulteu els fitxers a la carpeta `.gemini-agent/`:
+Per a més informació, consulteu els fitxers a la carpeta `.docs/`:
 
-- [Especificacions i Requisits](.gemini-agent/app-requirements.md)
-- [Guia de Configuració i Desplegament](.gemini-agent/setup-guide.md)
-- [Estat del Projecte i Roadmap](.gemini-agent/project-status.md)
+- [Especificacions i Requisits](.docs/app-requirements.md)
+- [Guia de Configuració i Desplegament](.docs/setup-guide.md)
+- [Estat del Projecte i Roadmap](.docs/project-status.md)
 
-## 🛠️ Configuració Ràpida
+## 🛠️ Configuració Ràpida (Docker)
 
-1. Instal·la dependències: `npm install`
-2. Configura el fitxer `.env` (mira la [guia de configuració](.gemini-agent/setup-guide.md)).
-3. Executa migracions: `npx prisma migrate dev`
-4. Inicia en mode desenvolupament: `npm run dev`
+1. Configura el fitxer `.env` (mira la [guia de configuració](.docs/setup-guide.md)).
+2. Aixeca el projecte: `docker compose up -d`
+3. Executa migracions (primera vegada): `docker exec gresca-app npx prisma migrate deploy`
+
 
 ---
 Desenvolupat per a equips que valoren el seu temps.
