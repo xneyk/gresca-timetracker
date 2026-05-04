@@ -1,31 +1,26 @@
 FROM node:22-alpine AS base
 
-# Instal·lar dependències només quan sigui necessari
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Instal·lar dependències
 COPY package.json package-lock.json* ./
-# Optimització per a màquines amb poca RAM
 RUN npm ci --prefer-offline --no-audit
 
-# Reconstruir el codi font
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generar Prisma client
+# Pas CLAU per a Prisma 7: Passar una URL fictícia durant el build perquè npx prisma generate no falli
+ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 RUN npx prisma generate
 
-# Desactivar telemetria i augmentar memòria per al build
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_OPTIONS="--max-old-space-size=1536"
 
 RUN npm run build
 
-# Imatge de producció
 FROM base AS runner
 WORKDIR /app
 
@@ -39,6 +34,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 
 USER nextjs
 EXPOSE 3000
