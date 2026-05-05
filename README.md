@@ -33,4 +33,4 @@ Per a més informació, consulteu els fitxers a la carpeta `.docs/`:
 
 
 ---
-Desenvolupat per a equips que valoren el seu temps.
+Desenvolupat per a equips que valoren el seu temps:)
